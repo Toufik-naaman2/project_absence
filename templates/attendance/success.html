@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Marked{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Success!</h4>
+            <p>{{ message }}</p>
+            <hr>
+            <p class="mb-0">Session: {{ session.course.name }} - {{ session.date }}</p>
+        </div>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

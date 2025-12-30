@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Session Details{% endblock %}
+
+{% block content %}
+<div class="container text-center">
+    <h2>{{ session.course.name }} ({{ session.course.code }})</h2>
+    <p class="lead">{{ session.date }} | {{ session.start_time }} - {{ session.end_time }}</p>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">QR Code</h5>
+                </div>
+                <div class="card-body text-center">
+                    <img src="{% url 'generate_qr' session.id %}" alt="QR Code" class="img-fluid mb-3"
+                        style="max-width: 250px;">
+                    <p class="small text-muted mb-3"><i class="bi bi-clock-history me-1"></i> Expires 30 min after start
+                    </p>
+                    <div class="alert alert-light border">
+                        <p class="small mb-1 text-muted">Test / Simulation Link:</p>
+                        <a href="{% url 'mark_attendance' session.token %}" class="fw-bold">Mark Presence (Simulate)</a>
+                    </div>
+                </div>
+            </div>
+
+            {% if user.role == 'teacher' or user.is_superuser %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Manual Attendance</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{% url 'mark_manual_attendance' session.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Select Student</label>
+                            <select name="student_id" class="form-select" required>
+                                <option value="">-- Choose Student --</option>
+                                {% for student in students %}
+                                <option value="{{ student.id }}">{{ student.username }} ({{ student.get_full_name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-person-plus me-1"></i> Mark Present
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Attendance History</h5>
+                    <span class="badge bg-primary rounded-pill">{{ attendance_records.count }} Present</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in attendance_records %}
+                                <tr>
+                                    <td>{{ record.student.get_full_name|default:record.student.username }}</td>
+                                    <td>{{ record.timestamp|date:"H:i:s" }}</td>
+                                    <td><span class="badge bg-success">Present</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">No records yet for this session.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'session_list' %}" class="btn btn-secondary">Back to Sessions</a>
+    </div>
+</div>
+{% endblock %}

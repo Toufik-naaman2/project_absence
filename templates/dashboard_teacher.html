@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card {
+        transition: transform 0.2s;
+        border-left: 4px solid #0d6efd;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold mb-4">Dashboard Overview</h2>
+    </div>
+
+    <!-- Hero Stats -->
+    <div class="col-md-3 mb-4">
+        <div class="card glass-card stat-card h-100 p-3">
+            <div class="small text-muted text-uppercase fw-bold">Active Courses</div>
+            <div class="h2 fw-bold mb-0 text-primary">{{ courses.count }}</div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card glass-card stat-card h-100 p-3" style="border-left-color: #198754;">
+            <div class="small text-muted text-uppercase fw-bold">Total Check-ins</div>
+            <div class="h2 fw-bold mb-0 text-success">{{ total_checkins }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card glass-card h-100">
+            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                <h5 class="fw-bold mb-0">Analytics: Check-ins per Course</h5>
+            </div>
+            <div class="card-body p-4">
+                <canvas id="teacherChart" style="max-height: 350px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card glass-card h-100">
+            <div class="card-header bg-transparent border-0 pt-4 px-4">
+                <h5 class="fw-bold mb-0">Quick Management</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-grid gap-3">
+                    <a href="{% url 'session_list' %}" class="btn btn-primary btn-lg rounded-3 py-3 shadow-sm">
+                        <i class="bi bi-calendar-event me-2"></i> Manage Sessions
+                    </a>
+                    <a href="{% url 'export_attendance_csv' %}" class="btn btn-outline-success btn-lg rounded-3 py-3">
+                        <i class="bi bi-file-spreadsheet me-2"></i> All Course Report (CSV)
+                    </a>
+                    <a href="{% url 'export_attendance_pdf' %}" class="btn btn-outline-danger btn-lg rounded-3 py-3">
+                        <i class="bi bi-file-pdf me-2"></i> All Course Report (PDF)
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h4 class="fw-bold mb-4 mt-5">My Assigned Courses</h4>
+<div class="row g-4">
+    {% for course in courses %}
+    <div class="col-md-4">
+        <div class="card glass-card border-0 h-100 shadow-sm border-top border-4 border-primary">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">{{ course.code }}</span>
+                    <i class="bi bi-journal-bookmark text-muted"></i>
+                </div>
+                <h5 class="fw-bold card-title">{{ course.name }}</h5>
+                <p class="text-muted small mb-4">{{ course.description|truncatechars:80 }}</p>
+                <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <a href="{% url 'session_list' %}?course_id={{ course.id }}"
+                        class="btn btn-sm btn-link p-0 text-decoration-none fw-bold">View Sessions <i
+                            class="bi bi-chevron-right ms-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <p class="text-muted">No courses assigned to you yet.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    const ctx = document.getElementById('teacherChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ chart_labels| safe }},
+        datasets: [{
+            data: {{ chart_data| safe }},
+        backgroundColor: [
+            '#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
+        ],
+        borderWidth: 0
+            }]
+        },
+        options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'bottom' }
+        },
+        cutout: '70%'
+    }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<style>
+    .login-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        border-radius: 16px;
+    }
+
+    .login-header {
+        background: linear-gradient(135deg, #111827 0%, #374151 100%);
+        color: white;
+        border-radius: 16px 16px 0 0;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .brand-icon {
+        font-size: 3rem;
+        margin-bottom: 10px;
+        display: block;
+    }
+</style>
+
+<div class="login-container">
+    <div class="col-md-5 col-lg-4">
+        <div class="card glass-card border-0">
+            <div class="login-header">
+                <i class="bi bi-mortarboard-fill brand-icon"></i>
+                <h4 class="mb-0 fw-bold">AttendancePro</h4>
+                <small class="opacity-75">Welcome back! Please login.</small>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="post">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger rounded-3 border-0 bg-danger bg-opacity-10 text-danger">
+                        {% for error in form.non_field_errors %}
+                        <i class="bi bi-exclamation-circle me-1"></i> {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="form-floating mb-3">
+                        <input type="text" name="username" class="form-control" id="id_username" placeholder="Username"
+                            required autofocus style="border-radius: 10px;">
+                        <label for="id_username"><i class="bi bi-person me-1"></i> Username</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input type="password" name="password" class="form-control" id="id_password"
+                            placeholder="Password" required style="border-radius: 10px;">
+                        <label for="id_password"><i class="bi bi-lock me-1"></i> Password</label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg py-3 rounded-3 fw-bold">
+                            Sign In <i class="bi bi-arrow-right ms-1"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-4 text-muted small">
+            &copy; 2025 AttendancePro System
+        </div>
+    </div>
+</div>
+{% endblock %}
