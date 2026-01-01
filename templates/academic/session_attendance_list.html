@@ -1,45 +1,61 @@
 {% extends 'base.html' %}
-
-{% block title %}Session Attendance List{% endblock %}
+{% block title %}Attendance List{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Attendance for {{ session.classmodule.module.name }}</h2>
-    <p class="lead">Date: {{ session.date }} | Time: {{ session.start_time }}</p>
-
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span>Student List</span>
-            <span class="badge bg-primary">Count: {{ attendances.count }}</span>
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="fw-bold text-dark mb-1">Attendance Details</h2>
+            <p class="text-muted"><i class="bi bi-book me-1"></i> {{ session.classmodule.module.name }} | <i class="bi bi-calendar3 me-1"></i> {{ session.date }}</p>
         </div>
-        <div class="card-body">
+        <div class="col-md-4 text-md-end">
+            <div class="p-3 bg-white shadow-sm rounded-4 d-inline-block border">
+                <span class="text-muted small d-block">Present Count</span>
+                <span class="h3 fw-bold text-primary mb-0">{{ attendances.count }} Students</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card glass-card border-0 shadow-sm" style="border-radius: 20px;">
+        <div class="card-body p-0">
             {% if attendances %}
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Student Name</th>
-                        <th>ID</th>
-                        <th>Time Marked</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for record in attendances %}
-                    <tr>
-                        <td>{{ record.student.user.get_full_name|default:record.student.user.username }}</td>
-                        <td>{{ record.student.user.student_id|default:"-" }}</td>
-                        <td>{{ record.timestamp|date:"H:i:s" }}</td>
-                        <td><span class="badge bg-success">{{ record.status }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr class="text-muted small text-uppercase">
+                            <th class="ps-4 py-3">Student Name</th>
+                            <th class="py-3">Student ID</th>
+                            <th class="py-3">Time Marked</th>
+                            <th class="text-end pe-4 py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in attendances %}
+                        <tr>
+                            <td class="ps-4 py-3 fw-bold text-dark">{{ record.student.user.get_full_name|default:record.student.user.username }}</td>
+                            <td class="text-muted">{{ record.student.user.student_id|default:"-" }}</td>
+                            <td class="font-monospace small"><i class="bi bi-clock me-1"></i> {{ record.timestamp|date:"H:i:s" }}</td>
+                            <td class="text-end pe-4">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
+                                    {{ record.status|upper }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-            <p class="text-muted">No attendance marked yet.</p>
+            <div class="text-center py-5">
+                <i class="bi bi-clipboard2-x display-1 text-light mb-3"></i>
+                <p class="text-muted">No attendance marked yet for this session.</p>
+            </div>
             {% endif %}
         </div>
-        <div class="card-footer">
-            <a href="{% url 'session_detail' session.pk %}" class="btn btn-secondary">Back to Session</a>
+        <div class="card-footer bg-white border-0 py-4 text-center" style="border-radius: 0 0 20px 20px;">
+            <a href="{% url 'session_detail' session.pk %}" class="btn btn-light px-5 fw-bold text-muted rounded-pill shadow-sm">
+                <i class="bi bi-arrow-left me-2"></i> Back to Session Detail
+            </a>
         </div>
     </div>
 </div>

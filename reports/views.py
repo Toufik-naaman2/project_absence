@@ -1,4 +1,6 @@
+from django.shortcuts import render, get_object_or_404, redirect
 from django.shortcuts import render
+from attendance.models import Seance
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 import csv
@@ -95,41 +97,48 @@ def export_attendance_pdf(request):
     p.save()
     return response
 
+
 @login_required
 def export_single_session_pdf(request, session_id):
     if not (request.user.is_superuser or request.user.role == 'teacher' or request.user.role == 'admin'):
          return HttpResponse("Unauthorized", status=403)
          
-    session = get_object_or_404(Session, pk=session_id)
-    if not request.user.is_superuser and request.user.role == 'teacher' and session.course.teacher != request.user:
-         return HttpResponse("Unauthorized for this course", status=403)
+    session = get_object_or_404(Seance, pk=session_id)
+    
+    if not request.user.is_superuser and request.user.role == 'teacher':
+        if session.classmodule.teacher.user != request.user:
+            return HttpResponse("Unauthorized for this course", status=403)
 
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="attendance_session_{session.id}.pdf"'
 
     p = canvas.Canvas(response)
     p.setFont("Helvetica-Bold", 16)
-    p.drawString(50, 800, f"Attendance Certificate - {session.course.name}")
+    
+    module_name = session.classmodule.module.name
+    p.drawString(50, 800, f"Attendance Certificate - {module_name}")
     
     p.setFont("Helvetica", 11)
     p.drawString(50, 770, f"Date: {session.date} | Time: {session.start_time} - {session.end_time}")
-    p.drawString(50, 755, f"Teacher: {session.course.teacher.get_full_name()}")
+    
+    teacher_name = session.classmodule.teacher.user.get_full_name() or session.classmodule.teacher.user.username
+    p.drawString(50, 755, f"Teacher: {teacher_name}")
     
     y = 720
     p.setFont("Helvetica-Bold", 11)
     p.drawString(50, y, "Student Name / Username")
-    p.drawString(300, y, "Student ID")
     p.drawString(450, y, "Status")
     y -= 15
     p.line(50, y+10, 550, y+10)
     
-    records = AttendanceRecord.objects.filter(session=session).select_related('student')
+    records = AttendanceRecord.objects.filter(session=session).select_related('student__user')
     p.setFont("Helvetica", 10)
     
     for record in records:
         y -= 20
-        p.drawString(50, y, record.student.get_full_name() or record.student.username)
-        p.drawString(300, y, record.student.student_id or "N/A")
+        
+        student_display = record.student.user.get_full_name() or record.student.user.username
+        p.drawString(50, y, student_display)
         p.drawString(450, y, "PRESENT")
         
         if y < 50:
