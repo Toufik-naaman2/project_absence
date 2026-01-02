@@ -1,179 +1,179 @@
 {% extends 'base.html' %}
 
 {% block title %}Student Dashboard{% endblock %}
+{% block title_header %}Academic Overview{% endblock %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-
 <style>
-    :root {
-        --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-        --glass-bg: rgba(255, 255, 255, 0.95);
+    /* Professional Minimalist Design */
+    .dashboard-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        height: 100%;
+        transition: all 0.2s ease;
     }
 
-    body {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #f3f4f6;
+    .card-header-custom {
+        padding: 24px 24px 0 24px;
+        background: transparent;
+        border: none;
     }
 
-    .welcome-header {
-        background: var(--primary-gradient);
-        color: white;
-        padding: 2rem;
-        border-radius: 20px;
-        margin-bottom: 2rem;
-        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
-    }
-
-    .glass-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        border-radius: 20px;
-        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-
-    .activity-card {
-        border-left: 5px solid #4f46e5;
-        border-radius: 12px !important;
-        background: #f9fafb !important;
+    .activity-item {
+        border: 1px solid #f3f4f6;
+        border-left: 4px solid #2563eb;
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 16px;
         margin-bottom: 12px;
         transition: transform 0.2s;
     }
 
-    .activity-card:hover {
-        transform: scale(1.02);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    .activity-item:hover {
+        transform: translateX(5px);
+        background: #f9fafb;
     }
 
-    .btn-scan {
-        background: var(--primary-gradient);
+    .btn-scan-modern {
+        background-color: #111827;
+        color: white;
         border: none;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        transition: all 0.3s;
-    }
-
-    .btn-scan:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
-    }
-
-    .status-badge {
         font-weight: 600;
-        letter-spacing: 0.3px;
+        padding: 16px;
+        border-radius: 12px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s;
+        text-decoration: none;
+        margin-top: 20px;
+    }
+
+    .btn-scan-modern:hover {
+        background-color: #1f2937;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .status-pill {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 50px;
+        background: #ecfdf5;
+        color: #059669;
+        border: 1px solid #d1fae5;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 350px;
+        width: 100%;
+        padding: 20px;
     }
 </style>
 
-<div class="container-fluid py-2">
-    <div class="welcome-header d-flex justify-content-between align-items-center">
-        <div>
-            <h2 class="fw-bold mb-1">Student Dashboard</h2>
-            <p class="mb-0 opacity-75 text-white">Track your attendance and academic progress.</p>
-        </div>
-        <div class="d-none d-md-block">
-            <i class="bi bi-mortarboard display-4"></i>
-        </div>
+<div class="container-fluid">
+    <div class="mb-5">
+        <h3 class="fw-bold text-dark mb-1">Welcome back, {{ user.get_full_name|default:user.username }}</h3>
+        <p class="text-muted small">Monitor your attendance performance and session logs.</p>
     </div>
 
     <div class="row g-4">
         <div class="col-lg-8">
-            <div class="card glass-card h-100 border-0">
-                <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <div class="d-flex align-items-center">
-                        <div class="p-2 bg-primary bg-opacity-10 rounded-3 me-3">
-                            <i class="bi bi-bar-chart-fill text-primary"></i>
-                        </div>
-                        <h5 class="fw-bold mb-0">Attendance Overview</h5>
+            <div class="dashboard-card">
+                <div class="card-header-custom d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold m-0" style="font-size: 1rem;">Attendance Distribution (%)</h5>
+                    <div class="p-2 bg-light rounded-3">
+                        <i class="bi bi-bar-chart text-primary"></i>
                     </div>
                 </div>
-                <div class="card-body p-4">
-                    <canvas id="attendanceChart" style="max-height: 400px;"></canvas>
+                <div class="chart-container">
+                    <canvas id="attendanceChart"></canvas>
                 </div>
             </div>
         </div>
 
         <div class="col-lg-4">
-            <div class="card glass-card h-100 border-0">
-                <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <div class="d-flex align-items-center">
-                        <div class="p-2 bg-info bg-opacity-10 rounded-3 me-3">
-                            <i class="bi bi-clock-history text-info"></i>
-                        </div>
-                        <h5 class="fw-bold mb-0">Recent Activity</h5>
+            <div class="dashboard-card p-4 d-flex flex-column">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="p-2 bg-light rounded-3 me-3">
+                        <i class="bi bi-clock-history text-dark"></i>
                     </div>
+                    <h5 class="fw-bold m-0" style="font-size: 1rem;">Recent Activity</h5>
                 </div>
-                <div class="card-body p-4 pt-2">
-                    <div class="list-group list-group-flush mb-4">
-                        {% for record in recent_records %}
-                        <div class="list-group-item activity-card p-3 border-0 shadow-sm">
-                            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                                <h6 class="fw-bold mb-0 text-dark">{{ record.session.classmodule.module.name }}</h6>
-                                <span class="badge bg-success-subtle text-success border border-success status-badge rounded-pill">
-                                    {{ record.status|capfirst }}
-                                </span>
-                            </div>
-                            <p class="text-muted small mb-2">{{ record.session.classmodule.class_obj.name }}</p>
-                            <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top border-light">
-                                <small class="text-muted"><i class="bi bi-calendar3 me-1"></i> {{ record.session.date|date:"d M Y" }}</small>
-                                <small class="text-muted font-monospace"><i class="bi bi-alarm me-1"></i> {{ record.timestamp|date:"H:i" }}</small>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="text-center py-5">
-                            <i class="bi bi-clipboard-x display-4 text-muted mb-3 d-block"></i>
-                            <p class="text-muted">No attendance logs found yet.</p>
-                        </div>
-                        {% endfor %}
-                    </div>
 
-                    <div class="mt-auto">
-                        <a href="{% url 'scan_qr' %}" class="btn btn-primary btn-scan btn-lg w-100 py-3 rounded-4 shadow-sm">
-                            <i class="bi bi-qr-code-scan me-2"></i> SCAN QR CODE
-                        </a>
+                <div class="activity-list flex-grow-1">
+                    {% for record in recent_records %}
+                    <div class="activity-item shadow-sm">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <span class="fw-bold text-dark" style="font-size: 0.9rem;">{{ record.session.classmodule.module.name }}</span>
+                            <span class="status-pill">Present</span>
+                        </div>
+                        <p class="text-muted extra-small mb-2" style="font-size: 0.75rem;">
+                            {{ record.session.classmodule.class_obj.name }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i> {{ record.session.date|date:"d M" }}</span>
+                            <span class="text-muted small"><i class="bi bi-alarm me-1"></i> {{ record.timestamp|date:"H:i" }}</span>
+                        </div>
                     </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox text-muted fs-2"></i>
+                        <p class="text-muted small mt-2">No activity recorded yet.</p>
+                    </div>
+                    {% endfor %}
                 </div>
+
+                <a href="{% url 'scan_qr' %}" class="btn-scan-modern">
+                    <i class="bi bi-qr-code-scan"></i>
+                    SCAN ATTENDANCE
+                </a>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    const ctx = document.getElementById('attendanceChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: {{ chart_labels|safe }},
-            datasets: [{
-                label: 'Attendance Rate %',
-                data: {{ chart_data|safe }},
-                backgroundColor: 'rgba(79, 70, 229, 0.7)',
-                borderColor: '#4f46e5',
-                borderWidth: 2,
-                borderRadius: 12,
-                hoverBackgroundColor: '#4f46e5'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [{
+                    label: 'Attendance %',
+                    data: {{ chart_data|safe }},
+                    backgroundColor: '#2563eb',
+                    borderRadius: 6,
+                    barThickness: 28,
+                    hoverBackgroundColor: '#1d4ed8'
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    grid: { color: '#f3f4f6', drawBorder: false },
-                    ticks: { font: { family: 'Plus Jakarta Sans' } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
                 },
-                x: {
-                    grid: { display: false },
-                    ticks: { font: { family: 'Plus Jakarta Sans', weight: '600' } }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { borderDash: [5, 5], color: '#f3f4f6', drawBorder: false },
+                        ticks: { font: { size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11, weight: '600' } }
+                    }
                 }
             }
-        }
+        });
     });
 </script>
 {% endblock %}
