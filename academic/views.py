@@ -48,7 +48,7 @@ def session_list(request):
     sessions = sessions.order_by('-date', '-start_time')
     
     # Pagination
-    paginator = Paginator(sessions, 10) # 10 sessions per page
+    paginator = Paginator(sessions, 5) # 10 sessions per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
